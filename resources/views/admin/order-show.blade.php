@@ -199,11 +199,8 @@
                 <p class="text-muted mb-0">Placed {{ optional($order->created_at)->format('M d, Y h:i A') }}</p>
             </div>
             <div class="d-flex gap-2 flex-wrap">
-                <button class="btn btn-outline-info btn-set-task py-2 px-4 fw-bold" id="printBtn">
-                    <i class="icofont-print me-2"></i>Print
-                </button>
-                <a href="{{ route('admin.order.pdf', $order->id) }}" class="btn btn-outline-success btn-set-task py-2 px-4 fw-bold">
-                    <i class="icofont-download me-2"></i>Download PDF
+                <a href="{{ route('admin.order.pdf', $order->id) }}" target="_blank" class="btn btn-outline-success btn-set-task py-2 px-4 fw-bold">
+                    <i class="icofont-file-document me-2"></i>Generate Invoice
                 </a>
                 <a href="{{ route('admin.page', 'order-list') }}" class="btn btn-secondary btn-set-task py-2 px-4 text-uppercase fw-bold">
                     Back to Orders

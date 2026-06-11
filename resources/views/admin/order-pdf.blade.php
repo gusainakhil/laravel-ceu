@@ -1,381 +1,417 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>Order {{ $order->order_number }}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice – {{ $order->order_number }}</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
         body {
-            font-family: Arial, sans-serif;
-            color: #333;
-            line-height: 1.6;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #111;
+            background: #fff;
+            padding: 0;
+            font-size: 13px;
         }
-        
-        .container {
+
+
+        /* Invoice Card */
+        .invoice {
             max-width: 800px;
             margin: 0 auto;
-            padding: 20px;
+            background: #fff;
+            border: 1px solid #ccc;
         }
-        
-        .header {
-            border-bottom: 3px solid #10b981;
-            padding-bottom: 20px;
-            margin-bottom: 30px;
+
+        /* ── Top Header ── */
+        .inv-top {
+            padding: 32px 40px 24px;
+            border-bottom: 2px solid #111;
         }
-        
-        .header h1 {
-            color: #10b981;
-            font-size: 28px;
-            margin-bottom: 5px;
-        }
-        
-        .header-info {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            color: #666;
-            margin-top: 10px;
-        }
-        
-        .section {
-            margin-bottom: 30px;
-        }
-        
-        .section-title {
-            background-color: #f0fdf4;
-            border-left: 4px solid #10b981;
-            padding: 12px 15px;
-            font-weight: bold;
-            color: #065f46;
-            margin-bottom: 15px;
-            font-size: 14px;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-            font-size: 12px;
-        }
-        
-        th {
-            background-color: #f3f4f6;
-            border: 1px solid #e5e7eb;
-            padding: 10px;
-            text-align: left;
-            font-weight: bold;
-            color: #374151;
-        }
-        
-        td {
-            border: 1px solid #e5e7eb;
-            padding: 10px;
-        }
-        
-        tr:nth-child(even) {
-            background-color: #f9fafb;
-        }
-        
-        .text-right {
-            text-align: right;
-        }
-        
-        .text-center {
-            text-align: center;
-        }
-        
-        .summary-section {
-            background-color: #f0fdf4;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #d1fae5;
-        }
-        
-        .summary-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 12px;
-        }
-        
-        .summary-row strong {
-            font-weight: bold;
-        }
-        
-        .total-row {
-            border-top: 2px solid #10b981;
-            padding-top: 10px;
-            margin-top: 10px;
-            font-size: 14px;
-            font-weight: bold;
-            color: #065f46;
-        }
-        
-        .badge {
+
+        .inv-top table { width: 100%; border-collapse: collapse; }
+
+        .logo-cell { vertical-align: top; }
+        .logo-cell img { max-height: 40px; max-width: 160px; }
+        .logo-name { font-size: 18px; font-weight: 900; color: #111; letter-spacing: -0.3px; }
+        .logo-sub  { font-size: 11px; color: #555; margin-top: 2px; }
+
+        .inv-word-cell { text-align: right; vertical-align: top; }
+        .inv-word { font-size: 42px; font-weight: 900; color: #111; text-transform: uppercase; letter-spacing: -1px; line-height: 1; }
+        .inv-meta { font-size: 12px; color: #444; margin-top: 6px; line-height: 1.8; text-align: right; }
+        .inv-meta strong { color: #111; }
+
+        .status-badge {
             display: inline-block;
-            padding: 3px 8px;
-            border-radius: 4px;
+            padding: 2px 10px;
             font-size: 11px;
-            font-weight: bold;
-            margin-right: 5px;
+            font-weight: 700;
+            border: 1.5px solid #111;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        
-        .badge-success {
-            background-color: #d1fae5;
-            color: #065f46;
+
+        /* ── Addresses ── */
+        .inv-addresses {
+            padding: 24px 40px;
+            border-bottom: 1px solid #ddd;
         }
-        
-        .badge-warning {
-            background-color: #fef3c7;
-            color: #92400e;
-        }
-        
-        .badge-info {
-            background-color: #dbeafe;
-            color: #0c4a6e;
-        }
-        
-        .customer-info {
-            font-size: 12px;
-            margin-top: 10px;
-        }
-        
-        .customer-info p {
-            margin-bottom: 5px;
-        }
-        
-        .footer {
-            border-top: 1px solid #e5e7eb;
-            padding-top: 20px;
-            margin-top: 30px;
-            text-align: center;
+
+        .inv-addresses table { width: 100%; border-collapse: collapse; }
+        .addr-col { vertical-align: top; padding-right: 30px; }
+        .addr-col:last-child { padding-right: 0; }
+        .addr-heading { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 6px; }
+        .addr-name    { font-size: 14px; font-weight: 700; color: #111; margin-bottom: 3px; }
+        .addr-detail  { font-size: 12px; color: #444; line-height: 1.7; }
+
+        /* ── Items Table ── */
+        .inv-items { padding: 24px 40px; border-bottom: 1px solid #ddd; }
+
+        .section-title {
             font-size: 10px;
-            color: #999;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #888;
+            margin-bottom: 10px;
         }
-        
-        .row {
-            display: flex;
-            gap: 30px;
-            margin-bottom: 30px;
+
+        .items-table { width: 100%; border-collapse: collapse; }
+
+        .items-table th {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #555;
+            padding: 8px 12px;
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            text-align: left;
         }
-        
-        .col-6 {
-            flex: 1;
+
+        .items-table td {
+            padding: 11px 12px;
+            border: 1px solid #ddd;
+            color: #222;
+            font-size: 12.5px;
+            vertical-align: top;
+        }
+
+        .item-name { font-weight: 700; color: #111; }
+        .item-sub  { font-size: 11px; color: #888; margin-top: 2px; }
+
+        .text-right  { text-align: right; }
+        .text-center { text-align: center; }
+
+        /* ── Payment + Totals ── */
+        .inv-bottom { padding: 24px 40px; border-bottom: 1px solid #ddd; }
+        .inv-bottom > table { width: 100%; border-collapse: collapse; }
+
+        .pay-col { width: 55%; vertical-align: top; padding-right: 30px; }
+        .tot-col { width: 45%; vertical-align: top; }
+
+        .pay-table { width: 100%; border-collapse: collapse; }
+        .pay-table td { padding: 7px 0; border-bottom: 1px solid #eee; font-size: 12px; vertical-align: top; }
+        .pay-table tr:last-child td { border-bottom: none; }
+        .pay-lbl { color: #888; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.5px; width: 110px; padding-right: 10px; white-space: nowrap; }
+        .pay-val { color: #111; font-weight: 700; word-break: break-all; overflow-wrap: break-word; }
+
+        .tot-table { width: 100%; border-collapse: collapse; }
+        .tot-table td { padding: 8px 0; font-size: 13px; color: #333; border-bottom: 1px solid #eee; }
+        .tot-table tr:last-child td { border-bottom: none; }
+        .tot-label { }
+        .tot-value { text-align: right; font-weight: 700; color: #111; }
+
+        .grand-row td {
+            border-top: 2px solid #111 !important;
+            padding-top: 12px;
+            font-size: 16px;
+            font-weight: 900;
+            color: #111;
+        }
+
+        /* ── Attendees / Access sub-sections ── */
+        .inv-sub { padding: 0 40px 24px; }
+
+        /* ── Footer ── */
+        .inv-footer {
+            padding: 14px 40px;
+            border-top: 2px solid #111;
+            background: #f9f9f9;
+        }
+
+        .inv-footer table { width: 100%; border-collapse: collapse; }
+        .foot-left  { font-size: 11px; color: #555; vertical-align: middle; }
+        .foot-right { font-size: 11px; color: #888; text-align: right; vertical-align: middle; white-space: nowrap; }
+
+        /* ── Print ── */
+        @media print {
+            @page { margin: 10mm 12mm; size: A4; }
+
+            body { background: #fff; padding: 0; }
+
+            .invoice { border: none; max-width: 100%; box-shadow: none; }
+
+            .inv-top      { padding: 20px 28px 18px; }
+            .inv-addresses{ padding: 18px 28px; }
+            .inv-items    { padding: 18px 28px; }
+            .inv-bottom   { padding: 18px 28px; }
+            .inv-sub      { padding: 0 28px 18px; }
+            .inv-footer   { padding: 12px 28px; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1>Order Invoice</h1>
-            <div class="header-info">
-                <div>
-                    <strong>Order Number:</strong> {{ $order->order_number }}<br>
-                    <strong>Order Date:</strong> {{ optional($order->created_at)->format('M d, Y') }}<br>
-                    <strong>Order Time:</strong> {{ optional($order->created_at)->format('h:i A') }}
-                </div>
-                <div>
-                    <strong>Order Status:</strong> <span class="badge badge-info">{{ ucfirst($order->status) }}</span><br>
-                    <strong>Payment Status:</strong> <span class="badge {{ $order->payment_status === 'paid' ? 'badge-success' : 'badge-warning' }}">{{ ucfirst($order->payment_status) }}</span>
-                </div>
-            </div>
-        </div>
 
-        <!-- Order Items -->
-        <div class="section">
-            <div class="section-title">Order Items</div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Item</th>
-                        <th>Type</th>
-                        <th class="text-center">Qty</th>
-                        <th class="text-right">Unit Price</th>
-                        <th class="text-right">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($order->items as $item)
-                    <tr>
-                        <td>
-                            <strong>{{ $item->title }}</strong><br>
-                            @if($item->course)
-                                <small style="color: #666;">Course: {{ $item->course->title }}</small>
-                            @elseif($item->subscriptionPlan)
-                                <small style="color: #666;">Plan: {{ $item->subscriptionPlan->name }}</small>
-                            @endif
-                            @if($item->description)
-                                <br><small style="color: #999;">{{ $item->description }}</small>
-                            @endif
-                        </td>
-                        <td>{{ ucfirst($item->item_type) }}</td>
-                        <td class="text-center">{{ $item->quantity }}</td>
-                        <td class="text-right">${{ number_format((float) $item->unit_price, 2) }}</td>
-                        <td class="text-right"><strong>${{ number_format((float) $item->total_price, 2) }}</strong></td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="5" class="text-center">No order items found</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+<div class="invoice">
 
-        <!-- Summary & Customer Info -->
-        <div class="row">
-            <!-- Summary -->
-            <div class="col-6">
-                <div class="section-title">Order Summary</div>
-                <div class="summary-section">
-                    <div class="summary-row">
-                        <span>Subtotal</span>
-                        <span>${{ number_format((float) $order->subtotal, 2) }}</span>
+    {{-- Top Header --}}
+    <div class="inv-top">
+        <table>
+            <tr>
+                <td class="logo-cell">
+                    <img src="{{ asset('assets/img/Logo.png') }}" alt="CEUTrainers"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                    <div class="logo-name" style="display:none;">CEUTrainers</div>
+                    <div class="logo-sub">304 S. Jones Blvd #5255, Las Vegas, NV 89107</div>
+                </td>
+                <td class="inv-word-cell">
+                    <div class="inv-word">Invoice</div>
+                    <div class="inv-meta">
+                        <strong>#{{ $order->order_number }}</strong><br>
+                        {{ optional($order->created_at)->format('M d, Y') }} &nbsp;·&nbsp; {{ optional($order->created_at)->format('h:i A') }}<br>
+                        <span class="status-badge">{{ ucfirst($order->payment_status) }}</span>
                     </div>
-                    @if($order->discount_total > 0)
-                    <div class="summary-row">
-                        <span>Discount</span>
-                        <span>-${{ number_format((float) $order->discount_total, 2) }}</span>
-                    </div>
-                    @endif
-                    @if($order->tax_total > 0)
-                    <div class="summary-row">
-                        <span>Tax</span>
-                        <span>${{ number_format((float) $order->tax_total, 2) }}</span>
-                    </div>
-                    @endif
-                    <div class="summary-row total-row">
-                        <span>Total Amount</span>
-                        <span>{{ $order->currency }} {{ number_format((float) $order->grand_total, 2) }}</span>
-                    </div>
-                    @if($order->coupon)
-                    <div class="summary-row" style="margin-top: 10px;">
-                        <span>Coupon Applied</span>
-                        <span>{{ $order->coupon->code }}</span>
-                    </div>
-                    @endif
-                    @if($order->payment_gateway)
-                    <div class="summary-row">
-                        <span>Payment Gateway</span>
-                        <span>{{ ucfirst($order->payment_gateway) }}</span>
-                    </div>
-                    @endif
-                </div>
-            </div>
-
-            <!-- Customer Info -->
-            <div class="col-6">
-                <div class="section-title">Customer Information</div>
-                <div class="customer-info">
-                    @if($order->user)
-                        <p><strong>{{ $order->user->name }}</strong></p>
-                        <p>{{ $order->user->email }}</p>
-                        @if($order->user->phone)
-                        <p>{{ $order->user->phone }}</p>
-                        @endif
-                        @if($order->user->company_name)
-                        <p><strong>Company:</strong> {{ $order->user->company_name }}</p>
-                        @endif
-                    @else
-                        <p><strong>{{ $order->guest_name ?: 'Guest Customer' }}</strong></p>
-                        <p>{{ $order->guest_email ?: 'No email provided' }}</p>
-                    @endif
-                </div>
-            </div>
-        </div>
-
-        <!-- Attendees -->
-        @if($order->attendees->count())
-        <div class="section">
-            <div class="section-title">Attendees</div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Job Title</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($order->attendees as $attendee)
-                    <tr>
-                        <td><strong>{{ $attendee->name }}</strong></td>
-                        <td>{{ $attendee->email }}</td>
-                        <td>{{ $attendee->phone ?: 'N/A' }}</td>
-                        <td>{{ $attendee->job_title ?: 'N/A' }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-        @endif
-
-        <!-- Payment Transactions -->
-        @if($order->transactions->count())
-        <div class="section">
-            <div class="section-title">Payment Transactions</div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Gateway</th>
-                        <th>Transaction ID</th>
-                        <th>Status</th>
-                        <th class="text-right">Amount</th>
-                        <th>Paid Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($order->transactions as $transaction)
-                    <tr>
-                        <td>{{ ucfirst($transaction->gateway_slug) }}</td>
-                        <td><small>{{ $transaction->transaction_id ?: 'N/A' }}</small></td>
-                        <td><span class="badge {{ $transaction->status === 'succeeded' ? 'badge-success' : 'badge-warning' }}">{{ ucfirst($transaction->status) }}</span></td>
-                        <td class="text-right">{{ $transaction->currency }} {{ number_format((float) $transaction->amount, 2) }}</td>
-                        <td>{{ $transaction->paid_at ? $transaction->paid_at->format('M d, Y') : 'Pending' }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-        @endif
-
-        <!-- Granted Access -->
-        @if($courseAccesses->count())
-        <div class="section">
-            <div class="section-title">Granted Course Access</div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Course</th>
-                        <th>Access Type</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($courseAccesses as $access)
-                    <tr>
-                        <td><strong>{{ optional($access->course)->title ?: 'Course Access' }}</strong></td>
-                        <td>{{ ucfirst($access->access_type) }}</td>
-                        <td><span class="badge badge-success">{{ ucfirst($access->status) }}</span></td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-        @endif
-
-        <!-- Footer -->
-        <div class="footer">
-            <p>This is an official order invoice from CEU Trainers. For inquiries, please contact support.</p>
-            <p>Generated on {{ now()->format('M d, Y h:i A') }}</p>
-        </div>
+                </td>
+            </tr>
+        </table>
     </div>
+
+    {{-- Addresses --}}
+    @php
+        $notes   = json_decode($order->notes, true);
+        $addr    = $notes['address_snapshot'] ?? null;
+        $hasAddr = $addr && !empty($addr['address_line_1']);
+    @endphp
+    <div class="inv-addresses">
+        <table>
+            <tr>
+                <td class="addr-col" style="width:{{ $hasAddr ? '33%' : '50%' }}">
+                    <div class="addr-heading">Bill To</div>
+                    @if($order->user)
+                        <div class="addr-name">{{ $order->user->name }}</div>
+                        <div class="addr-detail">
+                            {{ $order->user->email }}<br>
+                            @if($order->user->phone) {{ $order->user->phone }}<br> @endif
+                            @if($order->user->company_name) {{ $order->user->company_name }}<br> @endif
+                            @if($order->user->job_title) {{ $order->user->job_title }} @endif
+                        </div>
+                    @else
+                        <div class="addr-name">{{ $order->guest_name ?: 'Guest' }}</div>
+                        <div class="addr-detail">{{ $order->guest_email ?: '—' }}</div>
+                    @endif
+                </td>
+
+                <td class="addr-col" style="width:{{ $hasAddr ? '33%' : '50%' }}">
+                    <div class="addr-heading">Pay To</div>
+                    <div class="addr-name">CEUTrainers</div>
+                    <div class="addr-detail">
+                        304 S. Jones Blvd #5255<br>
+                        Las Vegas, NV 89107<br>
+                        United States<br>
+                        info@ceutrainers.com
+                    </div>
+                </td>
+
+                @if($hasAddr)
+                <td class="addr-col" style="width:33%">
+                    <div class="addr-heading">Billing Address</div>
+                    <div class="addr-detail">
+                        @if(!empty($addr['company_name'])) <strong>{{ $addr['company_name'] }}</strong><br> @endif
+                        {{ $addr['address_line_1'] }}<br>
+                        @if(!empty($addr['address_line_2'])) {{ $addr['address_line_2'] }}<br> @endif
+                        @if(!empty($addr['city'])) {{ $addr['city'] }}, @endif
+                        @if(!empty($addr['state'])) {{ $addr['state'] }} @endif
+                        @if(!empty($addr['postal_code'])) {{ $addr['postal_code'] }} @endif<br>
+                        @if(!empty($addr['country'])) {{ $addr['country'] }} @endif
+                    </div>
+                </td>
+                @endif
+            </tr>
+        </table>
+    </div>
+
+    {{-- Items --}}
+    <div class="inv-items">
+        <div class="section-title">Order Items</div>
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th class="text-center" style="width:36px;">#</th>
+                    <th>Item</th>
+                    <th class="text-center" style="width:46px;">Qty</th>
+                    <th class="text-right" style="width:90px;">Unit Price</th>
+                    <th class="text-right" style="width:90px;">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @php $i = 1; @endphp
+                @forelse($order->items as $item)
+                <tr>
+                    <td class="text-center">{{ $i++ }}</td>
+                    <td>
+                        <div class="item-name">{{ $item->title }}</div>
+                        @if($item->description) <div class="item-sub">{{ $item->description }}</div> @endif
+                        <div class="item-sub">{{ ucfirst($item->item_type) }}</div>
+                    </td>
+                    <td class="text-center">{{ $item->quantity }}</td>
+                    <td class="text-right">${{ number_format((float)$item->unit_price, 2) }}</td>
+                    <td class="text-right"><strong>${{ number_format((float)$item->total_price, 2) }}</strong></td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="5" class="text-center" style="color:#aaa; padding:20px;">No items found.</td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    {{-- Payment Info + Totals --}}
+    @php $txn = $order->transactions->first(); @endphp
+    <div class="inv-bottom">
+        <table>
+            <tr>
+                <td class="pay-col">
+                    <div class="section-title">Payment Info</div>
+                    <table class="pay-table">
+                        <tr>
+                            <td class="pay-lbl">Gateway</td>
+                            <td class="pay-val">{{ ucfirst($order->payment_gateway ?? '—') }}</td>
+                        </tr>
+                        <tr>
+                            <td class="pay-lbl">Payer Email</td>
+                            <td class="pay-val">{{ $txn->payer_email ?? ($order->user->email ?? '—') }}</td>
+                        </tr>
+                        <tr>
+                            <td class="pay-lbl">Transaction ID</td>
+                            <td class="pay-val" style="font-size:11px;">{{ $txn->transaction_id ?? '—' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="pay-lbl">Paid On</td>
+                            <td class="pay-val">{{ $txn && $txn->paid_at ? $txn->paid_at->format('M d, Y h:i A') : '—' }}</td>
+                        </tr>
+                        @if($order->coupon)
+                        <tr>
+                            <td class="pay-lbl">Coupon</td>
+                            <td class="pay-val">{{ $order->coupon->code }}</td>
+                        </tr>
+                        @endif
+                    </table>
+                </td>
+
+                <td class="tot-col">
+                    <div class="section-title">Summary</div>
+                    <table class="tot-table">
+                        <tr>
+                            <td class="tot-label">Subtotal</td>
+                            <td class="tot-value">${{ number_format((float)$order->subtotal, 2) }}</td>
+                        </tr>
+                        @if($order->discount_total > 0)
+                        <tr>
+                            <td class="tot-label">Discount</td>
+                            <td class="tot-value">-${{ number_format((float)$order->discount_total, 2) }}</td>
+                        </tr>
+                        @endif
+                        @if(!empty($order->tax_total) && $order->tax_total > 0)
+                        <tr>
+                            <td class="tot-label">Tax</td>
+                            <td class="tot-value">${{ number_format((float)$order->tax_total, 2) }}</td>
+                        </tr>
+                        @endif
+                        <tr class="grand-row">
+                            <td class="tot-label"><strong>Grand Total</strong></td>
+                            <td class="tot-value"><strong>{{ $order->currency ?? 'USD' }} {{ number_format((float)$order->grand_total, 2) }}</strong></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    {{-- Attendees --}}
+    @if($order->attendees->count())
+    <div class="inv-sub">
+        <div class="section-title" style="margin-bottom:10px;">Attendees</div>
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th class="text-center" style="width:36px;">#</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Job Title</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($order->attendees as $idx => $attendee)
+                <tr>
+                    <td class="text-center">{{ $idx + 1 }}</td>
+                    <td><strong>{{ $attendee->name }}</strong></td>
+                    <td>{{ $attendee->email }}</td>
+                    <td>{{ $attendee->phone ?: '—' }}</td>
+                    <td>{{ $attendee->job_title ?: '—' }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+    @endif
+
+    {{-- Course Accesses --}}
+    @if($courseAccesses->count())
+    <div class="inv-sub">
+        <div class="section-title" style="margin-bottom:10px;">Granted Course Access</div>
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Course</th>
+                    <th style="width:90px;">Access Type</th>
+                    <th style="width:90px;">Source</th>
+                    <th style="width:90px;">Expires</th>
+                    <th style="width:70px;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($courseAccesses as $access)
+                <tr>
+                    <td><strong>{{ optional($access->course)->title ?: 'Course Access' }}</strong></td>
+                    <td>{{ ucfirst($access->access_type) }}</td>
+                    <td>{{ ucfirst(str_replace('_', ' ', $access->access_source)) }}</td>
+                    <td>{{ $access->expires_at ? $access->expires_at->format('M d, Y') : 'Lifetime' }}</td>
+                    <td>{{ ucfirst($access->status) }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+    @endif
+
+    {{-- Footer --}}
+    <div class="inv-footer">
+        <table>
+            <tr>
+                <td class="foot-left">
+                    <strong>CEUTrainers</strong> &nbsp;·&nbsp; 304 S. Jones Blvd #5255, Las Vegas, NV 89107
+                    &nbsp;·&nbsp; support@ceutrainers.com
+                </td>
+                <td class="foot-right">Generated {{ now()->format('M d, Y h:i A') }}</td>
+            </tr>
+        </table>
+    </div>
+
+</div>
 </body>
 </html>
