@@ -344,7 +344,7 @@ class CartController extends Controller
                 'raw_response' => ['message' => 'Order total was fully discounted.'],
             ]);
 
-            return redirect()->route('home')->with('success', 'Congratulations! Your checkout is complete and your account/access is ready.');
+            return redirect()->route('dashboard')->with('success', 'Congratulations! Your checkout is complete and your access is ready.');
         }
 
         try {
@@ -401,7 +401,7 @@ class CartController extends Controller
             'auto_renew' => !empty($session['subscription']),
         ]);
 
-        return redirect()->route('home')->with('success', 'Payment successful! Your account/access is ready.');
+        return redirect()->route('dashboard')->with('success', 'Payment successful! Your access is ready.');
     }
 
     public function paypalSuccess(Request $request, Order $order)
@@ -450,7 +450,7 @@ class CartController extends Controller
                 'auto_renew' => true,
             ]);
 
-            return redirect()->route('home')->with('success', 'Subscription activated! Your account/access is ready.');
+            return redirect()->route('dashboard')->with('success', 'Subscription activated! Your access is ready.');
         }
 
         try {
@@ -488,7 +488,7 @@ class CartController extends Controller
             'raw_response' => $capture,
         ]);
 
-        return redirect()->route('home')->with('success', 'Payment successful! Your account/access is ready.');
+        return redirect()->route('dashboard')->with('success', 'Payment successful! Your access is ready.');
     }
 
     public function paymentCancel(Order $order)

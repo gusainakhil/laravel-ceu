@@ -175,6 +175,8 @@
             line-height: 1.8;
             color: #475569;
             font-size: 13px;
+            word-break: break-all;
+            overflow-wrap: break-word;
         }
 
         .summary-calculations {
@@ -205,6 +207,7 @@
             border-radius: 12px;
             padding: 24px;
             background-color: #ffffff;
+            margin-top: -20px;
         }
 
         .terms-card h6 {
@@ -277,21 +280,52 @@
             color: #0f172a;
         }
 
+        .terms-list {
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+
         /* Printing Adjustments */
         @media print {
+            @page {
+                margin: 10mm 12mm;
+            }
+
             body {
                 background-color: #ffffff;
                 padding: 0;
+                font-size: 12px;
             }
 
             .invoice-box {
                 box-shadow: none;
                 border: none;
-                padding: 0;
+                padding: 20px;
+                max-width: 100%;
             }
 
             .no-print {
                 display: none !important;
+            }
+
+            .invoice-title {
+                font-size: 36px;
+            }
+
+            .summary-block {
+                margin-bottom: 20px;
+            }
+
+            .table-container {
+                margin-bottom: 20px;
+            }
+
+            .recipient-section {
+                margin-bottom: 20px;
+            }
+
+            .metadata-bar {
+                margin-bottom: 20px;
             }
         }
     </style>

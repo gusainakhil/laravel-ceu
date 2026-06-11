@@ -427,7 +427,7 @@ class AdminController extends Controller
                 'courseAccesses.order',
             ])
             ->withCount(['orders', 'subscriptions', 'courseAccesses'])
-            ->withSum('orders', 'grand_total')
+            ->withSum(['orders' => fn($q) => $q->where('payment_status', 'paid')], 'grand_total')
             ->findOrFail($id);
 
         $activeSubscriptions = $customer->subscriptions
