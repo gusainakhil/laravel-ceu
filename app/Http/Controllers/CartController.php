@@ -18,6 +18,9 @@ use App\Models\UserAddress;
 use App\Models\UserCourseAccess;
 use App\Models\UserSubscription;
 use App\Models\WebhookEvent;
+use App\Mail\OrderConfirmationMail;
+use App\Mail\WelcomeMail;
+use App\Services\MailService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -168,7 +171,9 @@ class CartController extends Controller
             ->unique('slug')
             ->values();
 
-        return view('cart.checkout', compact('cartItems', 'subtotal', 'coupon', 'discount', 'total', 'gateways'));
+        $billingAddress = Auth::check() ? Auth::user()->defaultBillingAddress() : null;
+
+        return view('cart.checkout', compact('cartItems', 'subtotal', 'coupon', 'discount', 'total', 'gateways', 'billingAddress'));
     }
 
     public function applyCoupon(Request $request)
@@ -205,6 +210,18 @@ class CartController extends Controller
         session()->forget('checkout_coupon_id');
 
         return back()->with('success', 'Coupon removed successfully!');
+    }
+
+    public function checkEmail(Request $request)
+    {
+        $email = trim((string) $request->query('email'));
+        if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return response()->json(['exists' => false]);
+        }
+
+        return response()->json([
+            'exists' => User::where('email', $email)->exists(),
+        ]);
     }
 
     /**
@@ -253,7 +270,6 @@ class CartController extends Controller
                 'phone' => 'nullable|string|max:50',
                 'company_name' => 'nullable|string|max:255',
                 'job_title' => 'nullable|string|max:255',
-                'password' => 'required|string|min:8|confirmed',
                 'address_line_1' => 'nullable|string|max:255',
                 'city' => 'nullable|string|max:120',
                 'state' => 'nullable|string|max:120',
@@ -270,9 +286,14 @@ class CartController extends Controller
 
             if (User::where('email', $request->email)->exists()) {
                 return back()
-                    ->withInput($request->except(['password', 'password_confirmation']))
+                    ->withInput()
                     ->withErrors(['email' => 'This email already has an account. Please login to continue checkout.']);
             }
+
+            $namePart  = strtolower(substr(preg_replace('/[^a-zA-Z]/', '', $request->name), 0, 4));
+            $phoneOnly = preg_replace('/\D/', '', (string) $request->phone);
+            $phonePart = strlen($phoneOnly) >= 4 ? substr($phoneOnly, -4) : str_pad($phoneOnly, 4, (string) rand(0, 9));
+            $plainPassword = $namePart . $phonePart;
 
             $user = User::create([
                 'name' => $request->name,
@@ -280,13 +301,15 @@ class CartController extends Controller
                 'phone' => $request->phone,
                 'company_name' => $request->company_name,
                 'job_title' => $request->job_title,
-                'password' => Hash::make($request->password),
+                'password' => Hash::make($plainPassword),
                 'role' => 'customer',
                 'status' => 'active',
             ]);
 
-            Auth::login($user);
+            Auth::login($user, true);
             $cart->update(['user_id' => $user->id, 'session_id' => null]);
+
+            MailService::send($user->email, new WelcomeMail($user, $plainPassword));
         }
 
         if ($request->filled('address_line_1')) {
@@ -342,6 +365,8 @@ class CartController extends Controller
 
     public function stripeSuccess(Request $request, Order $order)
     {
+        $this->autoLoginOrderUser($order);
+
         $gateway = $this->gatewayForCheckout('stripe');
         $sessionId = $request->query('session_id');
 
@@ -381,6 +406,8 @@ class CartController extends Controller
 
     public function paypalSuccess(Request $request, Order $order)
     {
+        $this->autoLoginOrderUser($order);
+
         $gateway = $this->gatewayForCheckout('paypal');
         $paypalOrderId = $request->query('token');
         $paypalSubscriptionId = $request->query('subscription_id');
@@ -1161,6 +1188,8 @@ class CartController extends Controller
             $order->coupon->increment('used_count');
             session()->forget('checkout_coupon_id');
         }
+
+        MailService::send($user->email, new OrderConfirmationMail($order));
     }
 
     private function updatePendingTransaction(Order $order, array $data)
@@ -1185,6 +1214,13 @@ class CartController extends Controller
     private function orderBelongsToCurrentUser(Order $order)
     {
         return Auth::check() && (int) $order->user_id === (int) Auth::id();
+    }
+
+    private function autoLoginOrderUser(Order $order)
+    {
+        if (!Auth::check() && $order->user_id) {
+            Auth::loginUsingId($order->user_id, true);
+        }
     }
 
     private function hasMixedCheckoutItems($cartItems)

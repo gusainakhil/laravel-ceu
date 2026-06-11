@@ -55,6 +55,7 @@ Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
 Route::post('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
 Route::get('/checkout', [CartController::class, 'showCheckout'])->name('cart.checkout');
+Route::get('/checkout/check-email', [CartController::class, 'checkEmail'])->name('cart.checkout.check-email');
 Route::post('/checkout/coupon', [CartController::class, 'applyCoupon'])->name('cart.coupon.apply');
 Route::post('/checkout/coupon/remove', [CartController::class, 'removeCoupon'])->name('cart.coupon.remove');
 Route::post('/checkout', [CartController::class, 'processCheckout'])->name('cart.checkout.process');
@@ -65,6 +66,7 @@ Route::get('/payment/cancel/{order}', [CartController::class, 'paymentCancel'])-
 // User Authentication
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
+Route::post('/login/send-credentials', [LoginController::class, 'sendCredentials'])->name('login.send-credentials');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');

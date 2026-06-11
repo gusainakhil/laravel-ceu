@@ -344,7 +344,10 @@
                             </div>
                             <div class="col-md-6 field-gap">
                                 <label>Email Address*</label>
-                                <input type="email" name="email" class="form-control" value="{{ old('email', optional(Auth::user())->email) }}" {{ Auth::check() ? 'readonly' : 'required' }}>
+                                <input type="email" name="email" id="checkoutEmail" class="form-control" value="{{ old('email', optional(Auth::user())->email) }}" {{ Auth::check() ? 'readonly' : 'required' }}>
+                                @guest
+                                <div id="emailCheckMsg" style="display:none; margin-top:8px; font-size:14px;"></div>
+                                @endguest
                             </div>
                             <div class="col-md-6 field-gap">
                                 <label>Company Name</label>
@@ -364,31 +367,21 @@
                             </div>
                             <div class="col-md-6 field-gap">
                                 <label>City</label>
-                                <input type="text" name="city" class="form-control" value="{{ old('city') }}">
+                                <input type="text" name="city" class="form-control" value="{{ old('city', optional($billingAddress)->city) }}">
                             </div>
                             <div class="col-md-6 field-gap">
                                 <label>State</label>
-                                <input type="text" name="state" class="form-control" value="{{ old('state') }}">
+                                <input type="text" name="state" class="form-control" value="{{ old('state', optional($billingAddress)->state) }}">
                             </div>
                             <div class="col-md-6 field-gap">
                                 <label>Address</label>
-                                <input type="text" name="address_line_1" class="form-control" value="{{ old('address_line_1') }}">
+                                <input type="text" name="address_line_1" class="form-control" value="{{ old('address_line_1', optional($billingAddress)->address_line_1) }}">
                             </div>
                             <div class="col-md-6 field-gap">
                                 <label>Postal Code</label>
-                                <input type="text" name="postal_code" class="form-control" value="{{ old('postal_code') }}">
+                                <input type="text" name="postal_code" class="form-control" value="{{ old('postal_code', optional($billingAddress)->postal_code) }}">
                             </div>
 
-                            @guest
-                            <div class="col-md-6 field-gap">
-                                <label>Password*</label>
-                                <input type="password" name="password" class="form-control" required>
-                            </div>
-                            <div class="col-md-6 field-gap">
-                                <label>Confirm Password*</label>
-                                <input type="password" name="password_confirmation" class="form-control" required>
-                            </div>
-                            @endguest
                         </div>
                     </div>
 
@@ -555,5 +548,37 @@
     document.getElementById('toggleCoupon')?.addEventListener('click', function() {
         document.getElementById('couponForm')?.classList.toggle('is-open');
     });
+
+    @guest
+    (function() {
+        const emailInput = document.getElementById('checkoutEmail');
+        const msgBox = document.getElementById('emailCheckMsg');
+        if (!emailInput || !msgBox) return;
+
+        let timer = null;
+
+        emailInput.addEventListener('input', function() {
+            clearTimeout(timer);
+            msgBox.style.display = 'none';
+            msgBox.innerHTML = '';
+
+            const email = this.value.trim();
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+
+            timer = setTimeout(function() {
+                fetch('{{ route("cart.checkout.check-email") }}?email=' + encodeURIComponent(email))
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        if (data.exists) {
+                            msgBox.innerHTML = 'An account with this email already exists. <a href="{{ route("login") }}?redirect={{ urlencode(route("cart.checkout")) }}" class="fw-bold" style="color:#1ab69d;">Click here to login</a> and continue checkout.';
+                            msgBox.style.color = '#ee4a7f';
+                            msgBox.style.display = 'block';
+                        }
+                    })
+                    .catch(function() {});
+            }, 600);
+        });
+    })();
+    @endguest
 </script>
 @endsection

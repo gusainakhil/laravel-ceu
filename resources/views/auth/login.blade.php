@@ -250,7 +250,7 @@
                             <input type="checkbox" name="remember" class="form-check-input" id="remember">
                             <label class="form-check-label text-slate" for="remember">Remember my session</label>
                         </div>
-                        <a href="#" onclick="event.preventDefault(); alert('Password reset placeholder. Please contact site support.')">Forgot Password?</a>
+                        <a href="#" id="toggleForgot">Forgot Password?</a>
                     </div>
 
                     <button type="submit" class="auth-submit" id="auth-login-submit-btn">
@@ -261,9 +261,40 @@
                         New to CEUTrainers? <a href="{{ route('register') }}">Create a free account</a>
                     </p>
                 </form>
+
+                <div id="forgotBox" style="display:none; background:#f4fafa; border:1px solid #e7e7e7; border-radius:6px; padding:18px 20px; margin-top:16px;">
+                    @if(session('credentials_sent'))
+                        <p style="color:#1ab69d; font-weight:700; margin:0; font-size:14px;">
+                            <i class="fa fa-check-circle"></i> {{ session('credentials_sent') }}
+                        </p>
+                    @else
+                        <p style="font-size:14px; color:#555; margin:0 0 12px;">Enter your email and we'll send your login credentials directly.</p>
+                        <form action="{{ route('login.send-credentials') }}" method="POST" style="display:flex; gap:10px; flex-wrap:wrap;">
+                            @csrf
+                            <input type="email" name="email" class="form-control" placeholder="your@email.com" value="{{ old('email') }}" required style="flex:1; min-width:180px; height:44px; font-size:14px; border:1px solid #dedede; border-radius:6px; padding:0 14px;">
+                            <button type="submit" style="background:#1ab69d; color:#fff; border:0; border-radius:6px; padding:0 20px; height:44px; font-weight:700; font-size:14px; white-space:nowrap;">Send Credentials</button>
+                        </form>
+                    @endif
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+@endsection
+
+@section('scripts')
+<script>
+    document.getElementById('toggleForgot')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        var box = document.getElementById('forgotBox');
+        box.style.display = box.style.display === 'none' ? 'block' : 'none';
+    });
+
+    @if(session('credentials_sent'))
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('forgotBox').style.display = 'block';
+    });
+    @endif
+</script>
 @endsection
