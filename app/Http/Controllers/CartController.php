@@ -81,20 +81,14 @@ class CartController extends Controller
                         ->where('label', $chosenLabel)
                         ->first();
                     if ($pricing) {
-                        // Extract quantity from label (e.g., "6 Attendees" -> 6, "6 ODs & 6 Transcripts" -> 6)
-                        $quantity = 1;
-                        if (preg_match('/^(\d+)\s/', $chosenLabel, $matches)) {
-                            $quantity = (int)$matches[1];
-                        }
-                        
                         CartItem::create([
                             'cart_id' => $cart->id,
                             'item_type' => 'course',
                             'course_id' => $course->id,
                             'pricing_id' => $pricing->id,
-                            'quantity' => $quantity,
+                            'quantity' => 1,
                             'unit_price' => (float)$pricing->price,
-                            'total_price' => (float)$pricing->price * $quantity,
+                            'total_price' => (float)$pricing->price,
                         ]);
                         $addedAny = true;
                     }
